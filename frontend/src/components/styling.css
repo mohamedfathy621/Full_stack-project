@@ -1,0 +1,79 @@
+.arrows{
+    color:#fff;
+    border-radius:50%;
+    border: 1px solid  #000;
+    background-color:#000;
+    padding:5px;
+    position:relative;
+    bottom:300px
+}
+.card_image{
+    height:375px;
+    width:100%;
+    display:block;
+    background-color:black;
+    border-bottom: 0.5px solid #ccc; 
+    z-index: 2;
+}
+
+.instock_button{
+   
+    background-color: limegreen;
+    border: limegreen;
+    font-size: 20px;
+    padding: 15px;
+}
+
+.outstock_button{
+    background-color: grey;
+    border: gray;
+    font-size: 20px;
+    padding: 15px;
+    cursor: crosshair;
+}
+.outstock_button:hover {
+    background-color: grey; /* Change color on hover */
+    cursor: not-allowed;
+}
+.stock{
+    position: absolute; 
+    top: 40%; 
+    left: 25%;
+    font-weight: bold;
+    font-size: 32px;
+    color: lightgray;
+}
+.chosen_cat{
+    color:'limegreen';
+    border-bottom: 2px solid limegreen;
+}
+.text_attr{
+    border: 2px solid black;
+    padding: 10px;
+    margin: 5px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+.swatch_attr{
+    border: 2zpx solid black;
+    cursor: pointer;
+    padding: 2px;
+    margin: 5px;
+    
+}
+.cart_open{
+    opacity: 0.4;
+    background-color: grey;
+    animation: darkenEffect 1s forwards;
+}
+@keyframes darkenEffect {
+    0% {
+      filter: brightness(1); /* Fully bright (normal) */
+      background-color: lightgrey;
+    }
+    100% {
+      filter: brightness(0.5); /* Darkest point (20% brightness) */
+      background-color: gray;
+    }
+  }

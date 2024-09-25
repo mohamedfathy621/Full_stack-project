@@ -26,15 +26,16 @@ class Attribute extends Component {
     const elements = set.type === 'text'
       ? set.items.map((term, index) => (
           <div
+          className="col text_attr"
             key={index}
             data-testid={"product-attribute-"+
               set.name.toLowerCase().replace(/\s+/g, '-')+"-"+
               term.value.replace(/\s+/g, '-') +(index === main ? "-selected" : "").toString()}
-            className="col text_attr"
+            
             style={{ backgroundColor: index === main ? "black" : "", color: index === main ? "white" : "" }}
             onClick={() => this.handleClick(index)}
           >
-            {term.value}
+           {term.value}
           </div>
         ))
       : set.items.map((term, index) => (
@@ -44,20 +45,21 @@ class Attribute extends Component {
             data-testid={"product-attribute-"+
               set.name.toLowerCase().replace(/\s+/g, '-')+"-"+
               term.value.replace(/\s+/g, '-') +(index === main ? "-selected" : "").toString()}
-            style={{ border: index === main ? "2px solid limegreen" : "1px solid grey" }}
+            style={{ border: index === main ? "2px solid limegreen" :"" }}
             onClick={() => this.handleClick(index)}
           >
-            <div style={{ backgroundColor: term.value, padding: "20px" }}></div>
+            <div style={{ backgroundColor: term.value, padding:"20px",border: index === main ?"":"1px solid grey" ,margin:"1px"}}></div>
           </div>
         ));
 
     return (
       <div
+      className="text-start"
         data-testid={`product-attribute-${set.name.toLowerCase().replace(/\s+/g, '-')}`}
         style={{ marginBottom: '20px' }}
       >
-        <h3>{set.name}:</h3>
-        <div className="row" style={{ width: "300px" }}>
+        <div className="row"><p style={{fontSize:"20px", fontWeight:"700",margin:"2px",padding:"0px"}}>{set.name.toUpperCase()}:</p></div>
+        <div className="row" style={{width:set.type === 'text'?"400px":'280px' }}>
           {elements}
         </div>
       </div>

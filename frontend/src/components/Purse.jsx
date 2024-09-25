@@ -4,19 +4,27 @@ import Sold from "./Sold";
 class Purse extends Component {
   constructor(props) {
     super(props);
+    const storedTotal =parseFloat(sessionStorage.getItem('total'));
     this.state = {
       total: 0, //used to store cart total amount 
       isMounted: false, // Initialize isMounted in the state
+      DasGut: storedTotal>0
     };
   }
   //used to refresh total on sending the order to database
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps,prevState) {
     if (prevProps.re !== this.props.re) {
       if (!this.state.isMounted) {
         this.setState({ total: 0 });
       } else {
         this.setState({ isMounted: true });
       }
+    }
+    if(this.state.DasGut){
+      this.setState({ total: parseFloat(sessionStorage.getItem('total')), DasGut: false });
+    }
+    if(prevState.total!==this.state.total&&!this.state.DasGut){
+      sessionStorage.setItem('total', this.state.total.toString());
     }
   }
 //this element is used for the attributes options
@@ -44,7 +52,9 @@ class Purse extends Component {
                 backgroundColor: index === option.chosen ? "black" : "",
                 color: index === option.chosen ? "white" : "",
                 fontSize: "11px",
-                padding: '3px'
+                padding: '3px',
+                margin:'5px',
+                cursor:"crosshair"
               }}
             >
               {term.value}
@@ -67,7 +77,8 @@ class Purse extends Component {
                 backgroundColor: term.value,
                 padding: "10px",
                 marginLeft: "5px",
-                border: index === option.chosen ? "2px solid limegreen" : "1px solid grey"
+                border: index === option.chosen ? "2px solid limegreen" : "1px solid grey",
+                cursor:"crosshair"
               }}
             />
           )
@@ -93,7 +104,6 @@ class Purse extends Component {
   render() {
     const { orders, setCart, bubble, setBubble, setOrders } = this.props;
     const { total } = this.state;
-
     return (
       <>
       {/* each product is renderd in the component sold while the total is renderd sepratly  */}

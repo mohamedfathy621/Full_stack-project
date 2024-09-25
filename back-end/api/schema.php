@@ -1,6 +1,6 @@
 <?php
 
-require 'D:\xampp\htdocs\learit\vendor\autoload.php';
+require '/home/vol9_5/infinityfree.com/if0_37279313/htdocs/learit/vendor/autoload.php';
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Error\Error;
@@ -12,13 +12,18 @@ require_once 'queryType.php';
 
 
 class trying {
+    static protected $queryType;
+    static protected  $mutationType;
+    static protected $connection;
     static public function handle() {
-        global $queryType, $mutationType;
+        self::$connection = new mysqli('sql309.infinityfree.com', 'if0_37279313', 'ZqvEM9UYTo9JT', 'if0_37279313_project');
+        self::$queryType = new QueryType(self::$connection);
+        self::$mutationType = new MutationType(self::$connection);
         try {
             $schema = new Schema(
                 (new SchemaConfig())
-                ->setQuery($queryType)
-                ->setMutation($mutationType)
+                ->setQuery(self::$queryType)
+                ->setMutation(self::$mutationType)
             );
         
             $rawInput = file_get_contents('php://input');
@@ -43,7 +48,7 @@ class trying {
 
         header('Content-Type: application/json; charset=UTF-8');
         return json_encode($output);
-        echo json_encode($output);
+        
     }
 };
 ?>

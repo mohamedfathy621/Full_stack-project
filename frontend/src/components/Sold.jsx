@@ -10,8 +10,7 @@ class Sold extends Component {
   }
   //on mount adds the product price to the total
   componentDidMount() {
-      this.props.setTotal(this.props.total + this.props.order.price[0].amount);
-     
+       this.props.setTotal(this.props.total + this.props.order.price[0].amount);
   }
   //on update updates the total amount by the diffrence in the quantaity of the product
   componentDidUpdate() {
@@ -19,6 +18,7 @@ class Sold extends Component {
     
     if (this.props.order.quantatiy!==this.state.prevquant) {
       this.props.setTotal(this.props.total + (this.props.order.price[0].amount*(this.props.order.quantatiy-this.state.prevquant)));
+      
       this.setState({ prevquant:this.props.order.quantatiy  });
     }
   }
@@ -28,6 +28,7 @@ class Sold extends Component {
 
     if (this.props.order.quantatiy + dir > 0) {
       this.props.order.quantatiy += dir;
+      sessionStorage.setItem('orders', JSON.stringify(this.props.orders))
     } else {
       this.props.setTotal(Math.max(this.props.total - this.props.order.price[0].amount, 0));
       this.props.orders.splice(this.props.index, 1);
@@ -35,12 +36,12 @@ class Sold extends Component {
       this.props.setBubble(this.props.bubble - 1);
     }
   };
-
+  
   render() {
     return (
       <>
       {/* rendeers the product container */}
-      <div className='row container' style={{ marginBottom: "30px", padding: "0px" }}>
+      <div className='row container' style={{ marginBottom: "30px", padding: "2px" }}>
         <div className='col text-start'>
           {/* product name */}
           <div style={{ marginBottom: '10px' }}>
@@ -55,7 +56,7 @@ class Sold extends Component {
            {/* product attributes (inherited from Purse component class) */}
           {this.props.atr(this.props.order.options)}
         </div>
-        <div className='col-1' style={{ marginRight: "7px", marginLeft: "7px" }}>
+        <div className='col-1' style={{ marginRight: "7px", marginLeft: "15px" }}>
            {/* qunatity controls*/}
             {/* increase amount */}
           <div className='row text-center' data-testid='cart-item-amount-increase'
@@ -78,7 +79,7 @@ class Sold extends Component {
         </div>
          {/* product main image */}
         <div className='col-4' style={{ padding: "0px" }}>
-          <img className="card-img-top" style={{ width: "100%", border: "1px solid #eee", minHeight: "180px" }} src={this.props.order.image}></img>
+          <img className="card-img-top cart_pimage"  src={this.props.order.image} alt='product'></img>
         </div>
       </div>
       </>

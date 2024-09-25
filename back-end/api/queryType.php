@@ -3,62 +3,70 @@
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\InputObjectType;
-require_once 'Types.php';
-$host = 'localhost';     // Database host
-$username = 'root';      // Database username
-$password = 'KERdasa621998'; // Database password
-$database = 'project'; // Database name
-$connection = new mysqli($host, $username, $password, $database);
-if ($connection->connect_error) {
-    die('Connection failed: ' . $connection->connect_error);
+require_once 'ooptypes.php'; 
+abstract class Requests extends ObjectType{
+    public function __construct(mysqli $connection,string $name) {
+        mysqli_set_charset($connection, 'utf8mb4');
+        if ($connection->connect_error) {
+            die('Connection failed: ' . $connection->connect_error);
+        }
+        $config = [
+            'name' =>  $name,
+            'fields' => $this->getConf()
+        ];
+        parent::__construct($config);
+    }
+    abstract protected function getConf();
 }
-$categoryType = new CategoryType();
-$galleryType = new GalleryType();
-$currencyType = new CurrencyType();
-$attributeType = new AttributeType();
-$orderInputType = new OrderInputType();
-$priceType = new PriceType($currencyType);
-$attributesetType = new AtrributeSet($attributeType);
-$producttype = new ProductType($attributesetType,$galleryType,$priceType,$connection);
-$Ordertype= new OrderType();
-$resolver = new ProductCategoryResolver($connection);
-$queryType = new ObjectType([
-    'name' => 'Query',
-    'fields' => [
+class QueryType extends Requests{
+    protected $producttype;
+    protected $categoryType;
+    public function __construct(mysqli $connection) {
+        $this->producttype = new ProductType($connection);
+        $this->categoryType = new CategoryType($connection);
+        parent::__construct($connection,'Query');
+    }
+    protected function getConf() {
+        return [
+                
        'products' =>[
-        'type' => Type::listOf($producttype),
-        'args' => [
-            'category' => Type::nonNull(Type::String())
-        ],
-      'resolve' => function ($root, $args) use ($resolver) {
-                return $resolver->resolveProducts($args);
+        'type' => Type::listOf($this->producttype),
+        'resolve' => function ()  {
+                return $this->producttype->resolveProduct();
             },
        ],
+        
         'categories' => [
-            'type' => Type::listOf($categoryType),
-           'resolve' => function () use ($resolver) {
-                return $resolver->resolveCategories();
+            'type' => Type::listOf( $this->categoryType),
+           'resolve' =>  function () {
+                return $this->categoryType->resolveCategories();
             },
         ],
-    ]
-]);
-$mutationType = new ObjectType([
-    'name' => 'Mutation',
-    'fields' => [
-        'RegistOrder' => [
-            'type' => Type::listOf($Ordertype),
-            'args' => [
-                'orders' => Type::nonNull(
-                        Type::listOf($orderInputType)
-                )
-            ],
-             'resolve' => function ($root, $args) use ($resolver) {
-                return $resolver->resolveRegistOrder($args);
-            },
-        ]
-    ]
-    
-    
-]);
-
+        ];
+    }
+}
+class MutationType extends Requests{
+    protected $Ordertype;
+    protected $orderInputType;
+    public function __construct(mysqli $connection) {
+        $this->Ordertype = new OrderType($connection);
+        $this->orderInputType = new OrderInputType();
+        parent::__construct($connection,'Mutation');
+    }
+    protected function getConf() {
+        return [
+            'RegistOrder' => [
+                'type' => Type::listOf($this->Ordertype),
+                'args' => [
+                    'orders' => Type::nonNull(
+                            Type::listOf($this->orderInputType)
+                    )
+                ],
+                 'resolve' => function ($root, $args) {
+                    return $this->Ordertype->resolveRegistOrder($args);
+                },
+            ]
+        ];
+    }
+}
 ?>

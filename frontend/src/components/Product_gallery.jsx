@@ -21,7 +21,7 @@ class Product_gallery extends Component {
     const { main } = this.state;
 
     return (
-      <div className="col-7" data-testid="product-gallery">
+      <div className="col-6" data-testid="product-gallery">
         <div className="row" style={{ width: "800px" }}>
           {/* First Inner Column */}
           <div className="col-4" style={{ width: "120px", height: "600px", overflowX: "hidden" }}>
@@ -44,14 +44,16 @@ class Product_gallery extends Component {
               src={gallery[main].url}
               alt="Product"
             />
+            
             <i
-              className="fa-solid fa-arrow-left arrows"
+              className="fa-solid fa-chevron-left arrows"
               style={{ left: "15px", cursor: "pointer" }}
               onClick={(e) => this.handleClick(-1)}
             />
+           
             <i
-              className="fa-solid fa-arrow-right arrows"
-              style={{ left: "535px", cursor: "pointer" }}
+              className="fa-solid fa-chevron-right arrows"
+              style={{ left: "500px", cursor: "pointer" }}
               onClick={(e) => this.handleClick(1)}
             />
           </div>

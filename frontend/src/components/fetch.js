@@ -16,7 +16,6 @@ export const processOrderMutation = async (bill) => {
       orders: bill,
     },
   };
-  console.log(query);
   try {
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom';
 import "./styling.css";
 
 class Product_card extends Component {
@@ -15,16 +16,18 @@ class Product_card extends Component {
   //on click switches to product_details page
   handleClick = () => {
     const { cart, setPage, setData, product } = this.props;
+    const link = document.getElementById("/product/"+product.name);
     if (cart === 0) {
       setPage(1);
       setData(product);
+      link.click();
     }
   };
   //on clicking on easy purchase button adds it to order list 
   registOrder = (e) => {
     const { cart, setCart, product, setBubble, bubble, orders, setOrders } = this.props;
     const attributes = product.attributeset;
-
+    
     if (cart === 0) {
       e.stopPropagation();
       setCart(1);
@@ -38,7 +41,6 @@ class Product_card extends Component {
       if (found) {
         found.quantatiy += 1;
         setOrders(orders);
-        console.log(found);
       } else {
         setBubble(bubble + 1);
         setOrders([
@@ -57,20 +59,20 @@ class Product_card extends Component {
   };
 
   render() {
-    const { product, cart } = this.props;
+    const { product } = this.props;
     const { mouseon } = this.state;
-    const attributes = product.attributeset;
     const opac = product.inStock ? 1 : 0.4;
     const kebab = product.name.toLowerCase().replace(/\s+/g, '-');
-
     return (
       <>
       {/* renders a product card */}
       <div data-testid={'product-' + kebab} className="col-md-4" onClick={this.handleClick}>
+        
         <div
           className="card mb-4 box-shadow"
           onMouseOver={() => this.setMouseon(true)}
           onMouseLeave={() => this.setMouseon(false)}
+          style={{borderRadius:"0",maxWidth:"90%"}}
         >
           {/* the product image  */}
           <img
@@ -86,7 +88,7 @@ class Product_card extends Component {
             <div className="row">
               <div className="col">
                 <div className="d-flex justify-content-between align-items-center">
-                  <p className="text-muted s">
+                  <p style={{fontWeight:"700"}}>
                     {product.price[0].currency.symbol + product.price[0].amount}
                   </p>
                 </div>
@@ -96,29 +98,19 @@ class Product_card extends Component {
                 <button
                   type="button"
                   onClick={this.registOrder}
+                  className="quick_but"
                   style={{
-                    position: 'relative',
-                    bottom: '80px',
-                    left: '155px',
-                    zIndex: '3',
                     display: product.inStock && mouseon ? 'block' : 'none',
-                    backgroundColor: 'limegreen',
-                    border: '1px solid limegreen',
-                    borderRadius: '50%',
-                    paddingLeft: '8px',
-                    paddingRight: '8px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    color: 'white',
                   }}
                 >
-                  <i className="fa-solid fa-cart-shopping" style={{ zIndex: '3' }}></i>
+                   <i className='bx bx-cart' style={{zIndex:"3",fontSize:"24px"}}></i>
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Link id={"/product/" + product.name} style={{ textDecoration: 'none', display:"none"}} to={"/build/product?name=" + product.name}></Link>
       </>
     );
   }

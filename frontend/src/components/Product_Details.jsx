@@ -12,14 +12,12 @@ class Product_Details extends Component {
       isMounted: false,
     };
   }
-
   setData = (value) => {
     this.setState({ Data: value });
   };
   //stores the product in the orderlist 
   handleClick = () => {
     const { cart, setCart, product, setOrders, orders, setBubble, bubble } = this.props;
-    const { Data } = this.state;
     const attributes = product.attributeset;
     // switches the cartoverlay on 
     if (cart === 0) {
@@ -33,6 +31,7 @@ class Product_Details extends Component {
       } 
       // else adds the product to the order list
       else {
+        
         setBubble(bubble + 1); // increments the bubble
         setOrders([
           ...orders,
@@ -47,29 +46,34 @@ class Product_Details extends Component {
           },
         ]);
       }
+   
       this.setState({ isMounted: true });
     }
   };
 
   render() {
-    const { product, cart } = this.props;
+    const { product } = this.props;
+    if (!product) {
+      return <div className="loading-spinner"></div>;
+    }
     const { Data } = this.state;
     const attributes = product.attributeset;
     const check = product.inStock && Data === attributes.length ? "instock_button" : "outstock_button"; // alters the button attribute based on avalibality 
-
     const parser = new DOMParser();
     const decodedString = parser.parseFromString(product.description, 'text/html').documentElement.textContent;
-
+   
+    
     return (
       <>
       {/* the product gallery and attributes are each renders in thier own components to handle thier functionality  */}
-        <div className="container">
+        <div className="container" style={{maxWidth:"80%"}}>
           <div className="row">
             <Product_gallery gallery={product.gallery} />
-            <div className="col-4">
-              <div style={{ marginBottom: '20px' }}>
-                <h1>{product.name}</h1>
+            <div className="col-3 container" style={{marginLeft:"10%"}} >
+              <div className='row' style={{ marginBottom: '30px' }}>
+                <h2 style={{padding:"0px"}}>{product.name}</h2>
               </div>
+              <div style={{minHeight:'150px'}}>
               {attributes.map((set, index) => (
                 <Attribute
                   set={set}
@@ -79,11 +83,12 @@ class Product_Details extends Component {
                   mark={attributes.length}
                 />
               ))}
-              <div style={{ marginBottom: '15px' }}>
-                <h3>Price:</h3>
               </div>
               <div style={{ marginBottom: '20px' }}>
-                <h4>{product.price[0].currency.symbol + product.price[0].amount}</h4>
+                <h4 style={{fontWeight:"700"}}>PRICE:</h4>
+              </div>
+              <div style={{ marginBottom: '50px'}}>
+                <h3 style={{fontWeight:"700"}}>{product.price[0].currency.symbol + product.price[0].amount}</h3>
               </div>
               <div
                 className="row"
@@ -94,7 +99,7 @@ class Product_Details extends Component {
                   data-testid="add-to-cart"
                   type="button"
                   className={"btn btn-success " + check}
-                  disabled={product.inStock && Data === attributes.length ?false:true} style={{backgroundColor:product.inStock && Data === attributes.length ?"":"grey"}}
+                  disabled={product.inStock && Data === attributes.length ?false:true} style={{backgroundColor:product.inStock && Data === attributes.length ?"":"grey",borderRadius:"0"}}
                 >
                   ADD TO CART
                 </button>

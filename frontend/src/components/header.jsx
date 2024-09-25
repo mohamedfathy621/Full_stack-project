@@ -3,7 +3,6 @@ import image from '../assets/logo.jpg';
 import Categories from './Categories';
 import Purse from './Purse';
 import { fetchGraphQL, processOrderMutation } from './fetch';
-
 class Header extends Component {
   constructor(props) {
     super(props);
@@ -34,13 +33,7 @@ class Header extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.items !== this.props.items) {
-      if (this.state.items.length > 0) {
-        this.props.setCategory(this.state.items[0].name);
-      }
-    }
-  }
+  
 // used to control the display of the cart overlay
   handleClick = () => {
     this.props.cart === 0 ? this.props.setCart(1) : this.props.setCart(0);
@@ -78,8 +71,8 @@ class Header extends Component {
     return (
       <>
       {/* this is the header component  */}
-        <div className="container">
-          <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 border-bottom" style={{ marginBottom: "0px" }}>
+        <div className="container" style={{maxWidth:"82%"}}>
+          <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between " style={{ marginBottom: "0px",paddingBottom:"0px" }}>
              {/* this is the categories section which is a unorderd list of <a> elements renderd in their own component */}
             <ul className="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
               {items.map((item, index) => (
@@ -87,7 +80,7 @@ class Header extends Component {
                   data={item.name}
                   key={index}
                   num={index}
-                  chosen={this.state.Data}
+                  chosen={this.props.cat || this.state.Data}
                   setData={(data) => this.setState({ Data: data })}
                   setCategory={setCategory}
                   setPage={setPage}
@@ -96,43 +89,39 @@ class Header extends Component {
               ))}
             </ul>
             {/* this is the logo for the website  */}
+           
             <a href="/" className="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
               <div className="col d-flex flex-wrap align-items-end justify-content-end">
                 <img src={image} style={{ width: '100px', height: '80px' }} alt="Logo" />
               </div>
             </a>
+           
+            
               {/* this is the cart overlay section  */}
             <div className="col-md-3 text-end">
               {/* this is the cart button   */}
               <button
                 type="button"
-                style={{ background: 'none', border: 'none', padding: '20px', cursor: 'pointer', fontSize: '25px' }}
+                className='cart_button'
                 onClick={this.handleClick}
                 data-testid='cart-btn'
               >
                 {/* this is the cart icon  */}
-                <i className="fa-solid fa-cart-shopping" style={{ zIndex: "3" }}></i>
+                <i className='bx bx-cart' style={{zIndex:"3",fontSize:"30px"}}></i>
                 
                 {/* this is the bubble layout  */}
-                <div
+                <div 
+                  className='bubble'
                   style={{
-                    position: "absolute",
-                    backgroundColor: "#FF7F3E",
-                    borderRadius: "50%",
-                    paddingLeft: "3px",
-                    paddingRight: "3px",
-                    fontSize: "12px",
-                    top: "32px",
-                    right: "322px",
-                    display: bubble === 0 ? "none" : "flex"
+                    display: bubble === 0 ? "none" : "inline-block"
                   }}
                 >
-                  {bubble}
+                  <p className='bubble_num'>{bubble}</p>
                 </div>
               
               </button>
                {/* this is the cart overlay contatiner   */}
-              <div className='container' data-testid="cart-overlay" style={{ position: "absolute", top: "108px", width: "350px", backgroundColor: "white", zIndex: "3", padding: "20px", display: cart === 0 ? "none" : "block" }}>
+              <div className='container cart_overlay' data-testid="cart-overlay" style={{display: cart === 0 ? "none" : "block" }}>
                 <div className='text-start' style={{ marginBottom: "20px" }}>
                   <p className="d-inline-block" style={{ fontWeight: "bolder" }}>My Bag:</p>&nbsp;&nbsp;
                   <p className="d-inline-block">{orders.length > 1 ? orders.length + " items" : orders.length + " item"}</p>
@@ -152,8 +141,8 @@ class Header extends Component {
                 <div className='row'>
                   <button
                     type="button"
-                    className="btn btn-success"
-                    style={bubble > 0 ? { backgroundColor: "limegreen", border: "limegreen", fontSize: "14px", padding: "10px" } : { backgroundColor: "grey",cursor:"not-allowed" }}
+                    className={"btn btn-success "+(bubble > 0 ? "cart_button_working" :"cart_button_disabled")}
+                    style={bubble >0 ? {backgroundColor:'limegreen',border:"limegreen"} : {backgroundColor:"grey",border:"grey"}}
                     onClick={bubble > 0 ? this.sendOrder:null}
                     disabled={bubble > 0 ? false:true}
                   >

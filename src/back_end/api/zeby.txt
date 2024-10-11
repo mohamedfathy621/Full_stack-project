@@ -1,0 +1,253 @@
+<?php
+// queryType.php
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\InputObjectType;
+require_once 'Types.php';
+$host = 'sql309.infinityfree.com';     // Database host
+$username = 'if0_37279313';      // Database username
+$password = 'ZqvEM9UYTo9JT'; // Database password
+$database = 'if0_37279313_project'; // Database name
+$connection = new mysqli($host, $username, $password, $database);
+if ($connection->connect_error) {
+    die('Connection failed: ' . $connection->connect_error);
+}
+$categoryType = new CategoryType();
+$galleryType = new GalleryType();
+$currencyType = new CurrencyType();
+$attributeType = new AttributeType();
+$priceType = new PriceType($currencyType);
+$attributesetType = new AtrributeSet($attributeType);
+$producttype = new ProductType($attributesetType,$galleryType,$priceType,$connection);
+$Ordertype= new OrderType();
+$queryType = new ObjectType([
+    'name' => 'Query',
+    'fields' => [
+       'products' =>[
+        'type' => Type::listOf($producttype),
+        'args' => [
+            'category' => Type::nonNull(Type::String())
+        ],
+        'resolve' => function ($root,$args) use ($connection) {
+                $extra_sql=$args['category'];
+                $sql = "SELECT * FROM product".$extra_sql;
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $products = [];
+                while ($row = $result->fetch_assoc()) {
+                    
+                    $row['description']=htmlspecialchars($row['description']);
+                    $products[] = $row;
+                    
+                    
+                }
+                $result->free();
+                return $products ;
+            }
+       ],
+       'currencies' => [
+            'type' => Type::listOf($currencyType),
+            'resolve' => function () use ($connection) {
+                $sql = "SELECT label,symbol FROM currency";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $categories = [];
+                while ($row = $result->fetch_assoc()) {
+                    $categories[] = $row;
+                }
+                $result->free();
+                return $categories;
+            }
+        ],
+        'categories' => [
+            'type' => Type::listOf($categoryType),
+            'resolve' => function () use ($connection) {
+                $sql = "SELECT name FROM category";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $categories = [];
+                while ($row = $result->fetch_assoc()) {
+                    $categories[] = $row;
+                }
+                $result->free();
+                return $categories;
+            }
+        ],
+       
+        'galleries' => [
+            'type' => Type::listOf($galleryType),
+            'resolve' => function () use ($connection) {
+                $sql = "SELECT url, productId FROM gallery";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $galleries = [];
+                $zobry = [];
+                while ($row = $result->fetch_assoc()) {
+                    $productId = $row['productId'];
+                    if (!isset($zobry[$productId])) {
+                        $zobry[$productId] = [$row['url']];
+                    } else {
+                        array_push($zobry[$productId], $row['url']);
+                    }
+                }
+                foreach ($zobry as $key => $value) {
+                    array_push($galleries, ['url' => $value, 'productId' => $key]);
+                }
+                $result->free();
+                return $galleries;
+            }
+        ],
+        'prices' => [
+            'type' => Type::listOf($priceType),
+            'resolve' => function () use ($connection) {
+                $sql = "SELECT p.amount AS amount, c.label, c.symbol FROM price p JOIN currency c ON p.currencyId = c.id";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $prices = [];
+                while ($row = $result->fetch_assoc()) {
+                    $prices[] = [
+                        'amount' => (float) $row['amount'],
+                        'currency' => [
+                            'label' => $row['label'],
+                            'symbol' => $row['symbol'],
+                        ],
+                    ];
+                }
+                $result->free();
+                return $prices;
+            }
+        ],
+        'attributes' => [
+            'type' => Type::listOf($attributeType),
+            'resolve' => function () use ($connection) {
+                $sql = "SELECT displayValue, value FROM attribute";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $attributes = [];
+                while ($row = $result->fetch_assoc()) {
+                    $attributes[] = $row;
+                }
+                $result->free();
+                return $attributes;
+            }
+        ],
+        'attributesets' => [
+            'type' => Type::listof($attributesetType),
+            'resolve' => function () use($connection){
+                $sql = "SELECT a.name  AS name, a.productId, a.id,b.displayValue,b.value,a.type FROM attributeset a JOIN attribute b ON a.id = b.attributeSetId";
+                $result = $connection->query($sql);
+                if ($result === false) {
+                    throw new \Exception('Query failed: ' . $connection->error);
+                }
+                $inventory = [];
+                $zobry = [];
+                $helper='';
+                while ($row = $result->fetch_assoc()) {
+                    if (!isset($zobry[$row['id']])) {
+                        $inventory[]=[
+                            'id' => $row['id'],
+                            'name'=> $row['name'],
+                            'type' => $row['type']
+                        ];
+                        $zobry[$row['id']]=[
+                            ['displayValue' => $row['displayValue'],
+                            'value' => $row['value']]
+                        ];
+                        //echo("cool\n".$row['id']."\n");
+                        $helper=$row['id'];
+                    }
+                    else{
+                        array_push($zobry[$row['id']], ['displayValue' => $row['displayValue'], 'value' => $row['value']]);
+                    }
+                }
+                $result->free();
+                foreach ($inventory as $key => $value) {
+                    $inventory[$key]['items'] = $zobry[$value['id']];
+                    //echo("\nthis is key     ".$key."   and this is value    ".json_encode($value)."\n");
+                    //array_push($galleries, ['url' => $value, 'productId' => $key]);
+                }
+                //echo("\nthis is the a7a \n".json_encode($inventory)."\n") ;
+                return $inventory;
+            }
+        ]
+    ]
+]);
+$mutationType = new ObjectType([
+    'name' => 'Mutation',
+    'fields' => [
+        'RegistOrder' => [
+            'type' => Type::listOf($Ordertype),
+            'args' => [
+                'orders' => Type::nonNull(
+                    Type::listOf(
+                        new InputObjectType([
+                            'name' => 'OrderInput',
+                            'fields' => [
+                                'tag' => Type::nonNull(Type::string()),
+                                'order_id' => Type::nonNull(Type::string()),
+                                'options_set' => Type::nonNull(Type::string()),
+                                'price' => Type::nonNull(Type::float()),
+                                'quantatiy' => Type::nonNull(Type::int())
+                            ]
+                        ])
+                    )
+                )
+            ],
+            'resolve' => function ($root, $args) use ($connection) {
+                $orders = $args['orders'];
+                $insertedOrders = [];
+                $generatedOrderId = uniqid("ORD_");
+                $connection->begin_transaction();
+                try {
+                    $stmt = $connection->prepare(
+                        "INSERT INTO orders (tag, order_id, options_set,price,quantatiy) VALUES (?, ?, ?,?,?)"
+                    );
+                    foreach ($orders as $order) {
+                        $stmt->bind_param(
+                            "sssdi",  // i for int, d for double/float
+                            $order['tag'],
+                            $generatedOrderId,
+                            $order['options_set'],
+                            $order['price'],
+                            $order['quantatiy'],
+                        );
+                        $stmt->execute();
+                        $insertedOrders[] = [
+                            'tag' => $order['tag'],              // Tag from the input
+                            'order_id' => $generatedOrderId,    // Order ID from the input
+                            'options_set' => $order['options_set'], // Options set from the input
+                            'price' => $order['price'],          // Price from the input
+                            'quantatiy' => $order['quantatiy']     // Quantity from the input
+                        ];
+                    }
+                    $connection->commit();
+
+                }
+                catch (Exception $e) {
+                    // Rollback transaction if an error occurs
+                    $connection->rollback();
+                    throw new Exception('Error inserting orders: ' . $e->getMessage());
+                }
+                return $insertedOrders;
+                
+            }
+        ]
+    ]
+    
+    
+]);
+
+?>

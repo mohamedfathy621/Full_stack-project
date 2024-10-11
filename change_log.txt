@@ -1,77 +1,9 @@
-
+v1.2
 1 - Changes Done to Front-End
-    ^^Changes to the Header^^
-        1. Increased the width of the header.
-        2. Increased the distance between the category link and the underline.
-        3. Changed the icon for the cart.
-        4. Removed the bottom border of the header to match the design.
-        5. Changed the color scheme of the cart bubble to match the design.
-        6. Modified the attribute option box sizes to match the design.
-        7. Modified the attribute container size to match the design.
-        8. Removed the border radius of the place order button.
-
-    ^^Changes to the Body^^
-        I - Product Album
-            1. Increased the width of the body.
-            2. Increased the horizontal and vertical distance between the product cards.
-            3. Made the price font weight bolder.
-            4. Added a hover animation to the product card to match the design.
-            5. Modified the quick shop button:
-                - Changed the icon to match the design.
-                - Modified the size and radius to match the design.
-
-        II - Product Details
-            1. Increased the width of the container.
-            2. Modified image arrows:
-                - Added a hover property to change arrow color.
-                - Removed the border radius.
-                - Changed the arrow icon.
-                - Added transparency to the arrows.
-            3. Increased the vertical distance between the header and the body.
-            4. Modified attribute name text:
-                - Changed the font.
-                - Made all letters uppercase.
-                - Reduced the distance between the name and the options.
-            5. Modified each type of attribute options box size to match the design.
-            6. Adjusted the price to match the design.
-            7. Modified the place order button:
-                - Changed the size.
-                - Removed the border radius.
-            8. Increased the horizontal distance between the gallery and the details.
-
-    ^^Changes to Functionality^^
-        1. Added routing to the app to enable link sharing.
-        2. Added session storage to save cart orders until the session ends or the order is submitted.
-        3. Optimized the back-end API to minimize requests:
-            - A single back-end request is made when the page loads, fetching the product list from the database.
-            - Instead of sending a request based on the product category each time the category is switched, the product list is filtered based on the category.
-            - This makes switching between pages smoother as it doesn’t require waiting for a back-end response.
-
+    I-Responsivity
+	A.every aspect of the front end have been changed to have a responsive size to have a constant UI and to avoid  interface errors
 2 - Changes Done to Back-End
-    1. Refactored the entire back-end using a more OOP-oriented approach.  
-        I - Types
-            A. A base abstract class is implemented for `BaseType`, which includes the base types of the GraphQL model, e.g., (gallery, categories, currency, attribute).
-            B. A base abstract class is implemented for `NestedTypes`, which includes the types of the GraphQL model that have `BaseType` fields, e.g., (attribute set --> attribute, price --> currency).
-            C. Each model has its own abstract class to define its fields and configuration.
-            D. Each type has its own class where it is resolved within its class.
-            E. Removed all procedural code by utilizing encapsulation, delegating each class its set of responsibilities
-            , allowing different types of models to be implemented in their own classes.
+    I-Readabilty
+	A.each class has been implemented in it's own file 
+	B.classes are arranged in there respective folders
 
-            Example:
-            - `BaseType` extends `ObjectType`. The most basic form of an object type needs a MySQL connection and configuration (name, fields), along with a resolver.
-            - The constructor of `BaseType` handles the connection and name, while two separate abstract functions handle the field configuration and resolver.
-            - `Category` extends `BaseType`, implementing its own distinct config function and passing the name 'category' to the `parent::constructor`.
-            - `CategoryType` extends `Category`, where it implements its own resolver logic.
-
-            **Note:** This can vary for different types of categories, hence the need for an abstract `Category` class.
-
-        II - Queries and Mutations
-            A. An abstract class `Requests` that extends `ObjectType` is implemented to handle common functionality between queries and mutations.
-            B. Two separate classes are implemented for queries and mutations.
-            C. Each class encapsulates its own types to avoid procedural code.
-            D. The MySQL connection is initialized in the schema instead, due to feedback points.
-
-Key Feedback Points Addressed:
-1. Front-end changes to match the design.
-2. Added link routing functionality.
-3. Applied OOP principles to the back-end.
